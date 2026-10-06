@@ -1,4 +1,4 @@
-# Keystroke Dynamics for Parkinson's Disease Detection
+# Keystroke Dynamics for Parkinson's Disease Detection 
 
 Passive detection of early Parkinson's disease (PD) from the timing of ordinary
 typing, and an investigation of why classifiers that work on clinic-collected
