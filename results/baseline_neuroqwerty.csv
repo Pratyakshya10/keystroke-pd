@@ -1,0 +1,27 @@
+analysis,detail,n,auc,ci_low,ci_high
+reference score,nqScore,85,0.8068,0.7096,0.8975
+reference score,afTap,76,0.8326,0.74,0.9153
+reference score,sTap,85,0.6088,0.4908,0.7264
+reference score,typingSpeed,85,0.5587,0.4357,0.6797
+single feature,ht_mean,85,0.7287,0.6154,0.8289
+single feature,ht_median,85,0.6733,0.5553,0.7856
+single feature,ht_std,85,0.8295,0.7337,0.9127
+single feature,ht_iqr,85,0.7874,0.6824,0.8771
+single feature,ht_skew,85,0.5487,0.425,0.6701
+single feature,ht_kurt,85,0.5305,0.4094,0.6531
+single feature,ht_abs_diff,85,0.8239,0.7296,0.9064
+single feature,ft_median,85,0.5653,0.4423,0.6921
+single feature,ft_iqr,85,0.5648,0.4429,0.6885
+single feature,ht_left_median,85,0.6955,0.5802,0.8004
+single feature,ht_right_median,85,0.6694,0.5449,0.7789
+single feature,ht_hand_asym,85,0.5651,0.4408,0.6885
+LOSO logistic regression,hold core,85,0.8306,0.7378,0.9127
+LOSO logistic regression,hold core + flight,85,0.8411,0.7455,0.9195
+LOSO logistic regression,hold core + flight + hand,85,0.8643,0.7804,0.9352
+LOSO logistic regression,ht_mean only,85,0.6955,0.577,0.8023
+LOSO random forest,hold core + flight,85,0.7586,0.6436,0.8615
+label permutation null,"hold core, 200 shuffles, p=0.005",85,0.432,0.2126,0.5997
+LOSO within one study,CS1PD,31,0.7991,0.6136,0.9457
+LOSO within one study,CS2PD,54,0.8333,0.7033,0.9338
+"train on one study, test on other",CS1PD -> CS2PD,54,0.6861,0.5294,0.8214
+"train on one study, test on other",CS2PD -> CS1PD,31,0.8675,0.7149,0.9833
