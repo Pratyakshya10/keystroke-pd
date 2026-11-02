@@ -61,7 +61,12 @@ def bootstrap_auc_diff_ci(y, scores_a, scores_b, n_boot=2000, seed=0):
     return tuple(np.percentile(diffs, [2.5, 97.5]))
 
 
-def train_test_auc(X_train, y_train, X_test, y_test, model):
-    """Fit on one cohort, score the other. Used for the cross-study check."""
+def fit_scores(X_train, y_train, X_test, model):
+    """Fit on one cohort and return scores for another."""
     fitted = clone(model).fit(np.asarray(X_train, dtype=float), y_train)
-    return roc_auc_score(y_test, _score(fitted, np.asarray(X_test, dtype=float)))
+    return _score(fitted, np.asarray(X_test, dtype=float))
+
+
+def train_test_auc(X_train, y_train, X_test, y_test, model):
+    """Fit on one cohort, score the other. Used for the cross-study checks."""
+    return roc_auc_score(y_test, fit_scores(X_train, y_train, X_test, model))
