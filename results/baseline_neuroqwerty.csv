@@ -20,6 +20,8 @@ LOSO logistic regression,hold core + flight,85,0.8411,0.7455,0.9195
 LOSO logistic regression,hold core + flight + hand,85,0.8643,0.7804,0.9352
 LOSO logistic regression,ht_mean only,85,0.6955,0.577,0.8023
 LOSO random forest,hold core + flight,85,0.7586,0.6436,0.8615
+paired AUC difference vs afTap,hold core,76,-0.0184,-0.1687,0.1169
+paired AUC difference vs afTap,hold core + flight,76,-0.0073,-0.1586,0.1316
 label permutation null,"hold core, 200 shuffles, p=0.005",85,0.432,0.2126,0.5997
 LOSO within one study,CS1PD,31,0.7991,0.6136,0.9457
 LOSO within one study,CS2PD,54,0.8333,0.7033,0.9338
