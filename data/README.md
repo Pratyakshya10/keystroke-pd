@@ -50,3 +50,35 @@ Things worth knowing:
 - `updrs108` separates the groups perfectly (controls 0 to 6, PD 7 to 39.5), so it
   defines the label and is not used as an independent comparison.
 - `afTap` is missing for 9 of the 31 CS1PD subjects.
+
+### Tappy
+
+Download `Archived-Data.zip` and `Archived-users.zip` from PhysioNet and extract
+both into `data/raw/tappy/` so it holds the `Tappy Data/` folder (622 monthly
+files) and the `User_*.txt` label files. Open access, Open Data Commons
+Attribution License.
+
+What the files contain, as loaded by `load_tappy()`:
+
+- Data rows are tab separated with no header: user, date (YYMMDD), time of the key
+  press, hand (`L`, `R`, or `S` for space), hold time in **milliseconds**, direction,
+  latency, flight time. There are **no key names**, only the hand.
+- Labels come from `Parkinsons: True/False` in each user file. They are
+  self-reported, and the PD group is established and mostly treated (112 of 169
+  take levodopa), unlike a clinic study of early disease.
+- 227 users have a label file; 169 report PD and 58 do not. 49 users have data but
+  no label file and are left out, and 10 labelled users have no data. That leaves
+  217 users (162 PD, 55 control) and 9,014,543 keystrokes.
+- 328 rows could not be parsed and were dropped. The same sanity rules as for
+  neuroQWERTY then remove another 2.07% of keystrokes (about 13,400 holds are zero
+  or negative, down to roughly minus 24 hours, which looks like a midnight
+  rollover in the recorder; 642 are over 5 s).
+- Data per user varies enormously: median 4,611 keystrokes, but 47 users have
+  fewer than 500 and one has over a million. neuroQWERTY subjects have a median of
+  1,702 and at least 299 after cleaning.
+- The recorder clock is coarse. The most common hold values (62.5, 70.3, 78.1,
+  85.9, 93.8, 101.6, 109.4, 125.0 ms) are multiples of 1/128 s = 7.8125 ms. About
+  62% of all holds sit on that grid, and the share differs between users
+  (most between 50% and 90%), so the resolution is not the same for everyone.
+- One user has a single distinct hold value and a few others have only a handful,
+  almost all because they have only a few keystrokes.
