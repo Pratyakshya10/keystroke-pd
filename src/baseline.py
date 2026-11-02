@@ -17,7 +17,7 @@ from sklearn.metrics import roc_auc_score, roc_curve
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from src.evaluate import bootstrap_auc_ci, loso_scores, train_test_auc
+from src.evaluate import bootstrap_auc_ci, bootstrap_auc_diff_ci, loso_scores, train_test_auc
 from src.features import CORE, FLIGHT, HAND, subject_features
 from src.load import clean, load_neuroqwerty, load_subject_info, typing_keys_only
 
@@ -84,6 +84,15 @@ def main():
     rows.append(row("LOSO logistic regression", "ht_mean only", y, oof["ht_mean only"]))
     rows.append(row("LOSO random forest", "hold core + flight", y,
                     loso_scores(X[CORE + FLIGHT], y, ids, forest())))
+
+    # same subjects, same resamples: is hold time better than alternating finger tapping?
+    has_tap = info["afTap"].notna().to_numpy()
+    tap = -info["afTap"].to_numpy()[has_tap]
+    for name in ["hold core", "hold core + flight"]:
+        diff = roc_auc_score(y[has_tap], oof[name][has_tap]) - roc_auc_score(y[has_tap], tap)
+        lo, hi = bootstrap_auc_diff_ci(y[has_tap], oof[name][has_tap], tap)
+        rows.append({"analysis": "paired AUC difference vs afTap", "detail": name, "n": int(has_tap.sum()),
+                     "auc": diff, "ci_low": lo, "ci_high": hi})
 
     null = permutation_null(X[CORE], y, ids)
     observed = roc_auc_score(y, oof["hold core"])
