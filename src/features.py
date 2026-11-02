@@ -37,6 +37,32 @@ def flight_times(df):
     return (next_press - df["release_ts"]).reindex(df.index)
 
 
+HT_DIST = ["ht_mean", "ht_median", "ht_std", "ht_iqr", "ht_skew", "ht_kurt"]
+
+
+def hold_distribution_features(df):
+    """Hold-time distribution features only, for data without key names (Tappy).
+
+    Needs no key names and no keystroke order, so it is computed the same way on
+    neuroQWERTY and Tappy. Returns (X, y, subject_ids) like subject_features().
+    """
+    g = hold_times(df).groupby(df["subject_id"])
+    X = pd.DataFrame(
+        {
+            "ht_mean": g.mean(),
+            "ht_median": g.median(),
+            "ht_std": g.std(),
+            "ht_iqr": g.quantile(0.75) - g.quantile(0.25),
+            "ht_skew": g.skew(),
+            "ht_kurt": g.kurt(),
+        }
+    )
+    y = df.drop_duplicates("subject_id").set_index("subject_id").loc[X.index, "label"].to_numpy()
+    if X.isna().any().any():
+        raise ValueError("NaN in subject features: " + str(X.columns[X.isna().any()].tolist()))
+    return X, y, X.index.to_numpy()
+
+
 def _iqr(s):
     return s.quantile(0.75) - s.quantile(0.25)
 
