@@ -1,6 +1,8 @@
-"""Load the neuroQWERTY (MIT-CSXPD) typing sessions into one DataFrame.
+"""Load the neuroQWERTY (MIT-CSXPD) and Tappy keystroke data into DataFrames.
 
-Raw session files have no header and four columns: key, hold, release, press.
+load_tappy() is further down; Tappy has a different layout (see its docstring).
+
+neuroQWERTY raw session files have no header and four columns: key, hold, release, press.
 Times are seconds from the start of the session. Release comes *before* press
 in the file. Checked against release - press == hold and against nqDataLoader.py
 (f2 is release, f3 is press).
@@ -16,6 +18,7 @@ Output of load_neuroqwerty(), one row per keystroke:
 
 Rows keep the order they have in the file, which the cleaning step relies on.
 """
+import glob
 import os
 
 import numpy as np
@@ -76,9 +79,70 @@ def load_neuroqwerty(raw_dir):
     return pd.concat(frames, ignore_index=True)
 
 
+def load_tappy_users(raw_dir):
+    """One row per user that has a User_*.txt file (key: value lines). label 1 = PD."""
+    rows = []
+    for path in sorted(glob.glob(os.path.join(raw_dir, "User_*.txt"))):
+        fields = {}
+        with open(path, encoding="utf-8", errors="replace") as f:
+            for line in f:
+                if ":" in line:
+                    key, value = line.split(":", 1)
+                    fields[key.strip()] = value.strip()
+        fields["subject_id"] = os.path.basename(path)[len("User_"):-len(".txt")]
+        rows.append(fields)
+    users = pd.DataFrame(rows)
+    if not users["Parkinsons"].isin(["True", "False"]).all():
+        raise ValueError("unexpected value in the Parkinsons field")
+    users["label"] = (users["Parkinsons"] == "True").astype(int)
+    return users
+
+
 def load_tappy(raw_dir):
-    """Not written yet. Tappy has a different layout, so it waits until the data is here."""
-    raise NotImplementedError
+    """Tappy keystrokes for every user that has a label file, one row per keystroke.
+
+    Data files have no header: user, date (YYMMDD), time (HH:MM:SS.mmm of the key
+    press), hand (L/R/S for space), hold time in MILLISECONDS, direction, latency,
+    flight. Unlike neuroQWERTY there are no key names, only the hand.
+
+    Columns: subject_id, study, session_id (file name), hand, press_ts and
+    release_ts (seconds since 2000-01-01, so the same feature code works on both
+    datasets) and label. Rows whose date, time or hold time can't be parsed are
+    dropped; their count is in df.attrs["n_malformed"].
+    """
+    labels = load_tappy_users(raw_dir).set_index("subject_id")["label"]
+    epoch = pd.Timestamp("2000-01-01")
+    frames, n_malformed = [], 0
+    for path in sorted(glob.glob(os.path.join(raw_dir, "Tappy Data", "*.txt"))):
+        session = os.path.basename(path)[: -len(".txt")]
+        subject = session.split("_")[0]
+        if subject not in labels.index:
+            continue
+        raw = pd.read_csv(path, sep="\t", header=None, usecols=[1, 2, 3, 4], dtype=str,
+                          names=["date", "time", "hand", "hold_ms"], keep_default_na=False)
+        hold_ms = pd.to_numeric(raw["hold_ms"], errors="coerce")
+        day = pd.to_datetime(raw["date"], format="%y%m%d", errors="coerce")
+        clock = raw["time"].str.extract(r"^(\d\d):(\d\d):(\d\d\.\d+)$").astype(float)
+        ok = hold_ms.notna() & day.notna() & clock.notna().all(axis=1) & raw["hand"].isin(["L", "R", "S"])
+        n_malformed += int((~ok).sum())
+        raw, hold_ms, day, clock = raw[ok], hold_ms[ok], day[ok], clock[ok]
+        press = (day - epoch).dt.days * 86400.0 + clock[0] * 3600 + clock[1] * 60 + clock[2]
+        frames.append(
+            pd.DataFrame(
+                {
+                    "subject_id": subject,
+                    "study": "Tappy",
+                    "session_id": session,
+                    "hand": raw["hand"],
+                    "press_ts": press,
+                    "release_ts": press + hold_ms / 1000.0,
+                    "label": int(labels[subject]),
+                }
+            )
+        )
+    df = pd.concat(frames, ignore_index=True)
+    df.attrs["n_malformed"] = n_malformed
+    return df
 
 
 def clean(df):
