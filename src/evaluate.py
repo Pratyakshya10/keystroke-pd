@@ -49,6 +49,18 @@ def bootstrap_auc_ci(y, scores, n_boot=2000, seed=0):
     return tuple(np.percentile(aucs, [2.5, 97.5]))
 
 
+def bootstrap_auc_diff_ci(y, scores_a, scores_b, n_boot=2000, seed=0):
+    """95% interval for AUC(a) - AUC(b) on the same subjects, resampled together."""
+    y, a, b = np.asarray(y), np.asarray(scores_a), np.asarray(scores_b)
+    rng = np.random.default_rng(seed)
+    diffs = []
+    while len(diffs) < n_boot:
+        idx = rng.integers(0, len(y), len(y))
+        if len(set(y[idx])) == 2:
+            diffs.append(roc_auc_score(y[idx], a[idx]) - roc_auc_score(y[idx], b[idx]))
+    return tuple(np.percentile(diffs, [2.5, 97.5]))
+
+
 def train_test_auc(X_train, y_train, X_test, y_test, model):
     """Fit on one cohort, score the other. Used for the cross-study check."""
     fitted = clone(model).fit(np.asarray(X_train, dtype=float), y_train)
