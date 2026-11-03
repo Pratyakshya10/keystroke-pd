@@ -26,6 +26,10 @@ import pandas as pd
 
 STUDIES = ["CS1PD", "CS2PD"]
 RAW_COLUMNS = ["key", "hold", "release", "press"]
+HANDS = ["L", "R", "S"]
+DIRECTIONS = ["LL", "LR", "LS", "RL", "RR", "RS", "SL", "SR", "SS"]
+HAND_TYPE = pd.CategoricalDtype(HANDS)
+DIRECTION_TYPE = pd.CategoricalDtype(DIRECTIONS)
 
 
 def load_subject_info(raw_dir):
@@ -105,10 +109,12 @@ def load_tappy(raw_dir):
     press), hand (L/R/S for space), hold time in MILLISECONDS, direction, latency,
     flight. Unlike neuroQWERTY there are no key names, only the hand.
 
-    Columns: subject_id, study, session_id (file name), hand, press_ts and
-    release_ts (seconds since 2000-01-01, so the same feature code works on both
-    datasets) and label. Rows whose date, time or hold time can't be parsed are
-    dropped; their count is in df.attrs["n_malformed"].
+    Columns: subject_id, study, session_id (file name), hand, direction (hand of
+    the previous key + hand of this one), press_ts and release_ts (seconds since
+    2000-01-01, so the same feature code works on both datasets), latency_ms and
+    flight_ms as recorded, and label. Rows whose date, time, hand, direction or
+    hold time can't be parsed are dropped (a few lines have fields run together);
+    their count is in df.attrs["n_malformed"].
     """
     labels = load_tappy_users(raw_dir).set_index("subject_id")["label"]
     epoch = pd.Timestamp("2000-01-01")
@@ -118,12 +124,14 @@ def load_tappy(raw_dir):
         subject = session.split("_")[0]
         if subject not in labels.index:
             continue
-        raw = pd.read_csv(path, sep="\t", header=None, usecols=[1, 2, 3, 4], dtype=str,
-                          names=["date", "time", "hand", "hold_ms"], keep_default_na=False)
+        raw = pd.read_csv(path, sep="\t", header=None, usecols=[1, 2, 3, 4, 5, 6, 7], dtype=str,
+                          names=["date", "time", "hand", "hold_ms", "direction", "latency_ms", "flight_ms"],
+                          keep_default_na=False)
         hold_ms = pd.to_numeric(raw["hold_ms"], errors="coerce")
         day = pd.to_datetime(raw["date"], format="%y%m%d", errors="coerce")
         clock = raw["time"].str.extract(r"^(\d\d):(\d\d):(\d\d\.\d+)$").astype(float)
-        ok = hold_ms.notna() & day.notna() & clock.notna().all(axis=1) & raw["hand"].isin(["L", "R", "S"])
+        ok = (hold_ms.notna() & day.notna() & clock.notna().all(axis=1)
+              & raw["hand"].isin(HANDS) & raw["direction"].isin(DIRECTIONS))
         n_malformed += int((~ok).sum())
         raw, hold_ms, day, clock = raw[ok], hold_ms[ok], day[ok], clock[ok]
         press = (day - epoch).dt.days * 86400.0 + clock[0] * 3600 + clock[1] * 60 + clock[2]
@@ -133,9 +141,12 @@ def load_tappy(raw_dir):
                     "subject_id": subject,
                     "study": "Tappy",
                     "session_id": session,
-                    "hand": raw["hand"],
+                    "hand": raw["hand"].astype(HAND_TYPE),
+                    "direction": raw["direction"].astype(DIRECTION_TYPE),
                     "press_ts": press,
                     "release_ts": press + hold_ms / 1000.0,
+                    "latency_ms": pd.to_numeric(raw["latency_ms"], errors="coerce"),
+                    "flight_ms": pd.to_numeric(raw["flight_ms"], errors="coerce"),
                     "label": int(labels[subject]),
                 }
             )
