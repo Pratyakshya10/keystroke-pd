@@ -1,0 +1,46 @@
+analysis,detail,n,auc,ci_low,ci_high
+"single feature, neuroQWERTY",ht_mean,85,0.7287,0.6154,0.8289
+"single feature, neuroQWERTY",ht_median,85,0.6733,0.5553,0.7856
+"single feature, neuroQWERTY",ht_std,85,0.8295,0.7337,0.9127
+"single feature, neuroQWERTY",ht_iqr,85,0.7874,0.6824,0.8771
+"single feature, neuroQWERTY",ht_skew,85,0.5487,0.425,0.6701
+"single feature, neuroQWERTY",ht_kurt,85,0.5305,0.4094,0.6531
+"single feature, Tappy",ht_mean,177,0.5621,0.4627,0.6512
+"single feature, Tappy",ht_median,177,0.5608,0.4609,0.651
+"single feature, Tappy",ht_std,177,0.5932,0.4987,0.6885
+"single feature, Tappy",ht_iqr,177,0.5702,0.4722,0.6656
+"single feature, Tappy",ht_skew,177,0.4667,0.371,0.5677
+"single feature, Tappy",ht_kurt,177,0.471,0.3707,0.5788
+LOSO logistic regression,neuroQWERTY,85,0.8295,0.7348,0.9122
+LOSO logistic regression,Tappy,177,0.4807,0.3806,0.5847
+transfer,"train neuroQWERTY, test Tappy",177,0.5948,0.5042,0.6894
+transfer,"train Tappy, test neuroQWERTY",85,0.7669,0.6611,0.8566
+"Tappy, only users with >= 1500 keystrokes",all their keystrokes,141,0.5082,0.4006,0.6156
+"Tappy, matched to neuroQWERTY data size","1500 random keystrokes per user, 5 draws, range",141,0.5242,0.5034,0.5569
+neuroQWERTY with a coarser clock,"7.8 ms ticks, 20 random phases, range",85,0.8387,0.8344,0.845
+neuroQWERTY with a coarser clock,"15.6 ms ticks, 20 random phases, range",85,0.8201,0.8156,0.8234
+Tappy subgroup vs controls,PD on levodopa,130,0.5122,0.3983,0.6134
+Tappy subgroup vs controls,PD not on levodopa,90,0.4226,0.3083,0.5395
+Tappy subgroup vs controls,"PD, self-reported impact Mild",100,0.4835,0.364,0.5994
+Tappy subgroup vs controls,"PD, self-reported impact Medium",99,0.485,0.3691,0.6042
+Tappy subgroup vs controls,"PD, self-reported impact Severe",60,0.4665,0.2873,0.6429
+Tappy age check,birth year alone (older = more PD),149,0.5192,0.4006,0.6333
+label permutation null,"Tappy, hold-time distribution features, 100 shuffles, p=0.446",177,0.447,0.2823,0.5745
+EXPLORATORY Tappy richer features,"hold-time distribution only, same 169 users",169,0.4998,0.3996,0.6017
+"EXPLORATORY single feature, Tappy",ht_L_median,169,0.5501,0.4483,0.6516
+"EXPLORATORY single feature, Tappy",ht_L_std,169,0.5917,0.4924,0.6925
+"EXPLORATORY single feature, Tappy",ht_R_median,169,0.543,0.4451,0.6345
+"EXPLORATORY single feature, Tappy",ht_R_std,169,0.5987,0.5037,0.6906
+"EXPLORATORY single feature, Tappy",ht_S_median,169,0.5731,0.4755,0.6647
+"EXPLORATORY single feature, Tappy",ht_S_std,169,0.637,0.5351,0.7388
+"EXPLORATORY single feature, Tappy",lat_LL_iqr,169,0.5345,0.4247,0.645
+"EXPLORATORY single feature, Tappy",lat_LL_median,169,0.5102,0.4053,0.6182
+"EXPLORATORY single feature, Tappy",lat_LR_iqr,169,0.5401,0.4248,0.6467
+"EXPLORATORY single feature, Tappy",lat_LR_median,169,0.5316,0.4286,0.6311
+"EXPLORATORY single feature, Tappy",lat_RL_iqr,169,0.5353,0.4309,0.6431
+"EXPLORATORY single feature, Tappy",lat_RL_median,169,0.5168,0.4161,0.621
+"EXPLORATORY single feature, Tappy",lat_RR_iqr,169,0.5375,0.4311,0.64
+"EXPLORATORY single feature, Tappy",lat_RR_median,169,0.5412,0.4419,0.6472
+EXPLORATORY Tappy richer features,"LOSO logistic regression, 20 features",169,0.4767,0.3829,0.5737
+EXPLORATORY Tappy richer features,"LOSO random forest, 20 features",169,0.5048,0.3938,0.6164
+label permutation null,"Tappy, richer features, 100 shuffles, p=0.554",169,0.4764,0.3029,0.605
