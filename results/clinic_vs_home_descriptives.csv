@@ -1,0 +1,3 @@
+dataset,subjects,pd,share_pd,median_keystrokes,median_hold_ms_control,median_hold_ms_pd,std_hold_ms_control,std_hold_ms_pd,cohens_d_median,cohens_d_std
+neuroQWERTY,85,42,0.494,1702,92.1,121.6,28.4,44.2,0.67,1.33
+Tappy,177,134,0.757,8076,109.4,117.2,37.4,42.1,0.24,0.29
