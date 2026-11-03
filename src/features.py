@@ -63,6 +63,30 @@ def hold_distribution_features(df):
     return X, y, X.index.to_numpy()
 
 
+def tappy_features(df):
+    """Richer Tappy features: the hold-time distribution plus hold time by hand and
+    latency (press to press) by key direction. Exploratory, added after the plain
+    hold-time features showed no signal on Tappy. Latencies above 2 s are treated as
+    pauses and ignored. Returns (X, y, subject_ids).
+    """
+    base, y, ids = hold_distribution_features(df)
+    hold = hold_times(df)
+    latency = df["latency_ms"].where(df["latency_ms"].between(0, 2000)) / 1000
+    parts = {}
+    for hand in ["L", "R", "S"]:
+        g = hold[df["hand"] == hand].groupby(df["subject_id"])
+        parts[f"ht_{hand}_median"] = g.median()
+        parts[f"ht_{hand}_std"] = g.std()
+    for direction in ["LL", "LR", "RL", "RR"]:
+        g = latency[df["direction"] == direction].groupby(df["subject_id"])
+        parts[f"lat_{direction}_median"] = g.median()
+        parts[f"lat_{direction}_iqr"] = g.quantile(0.75) - g.quantile(0.25)
+    X = pd.concat([base, pd.DataFrame(parts).reindex(base.index)], axis=1)
+    if X.isna().any().any():
+        raise ValueError("NaN in Tappy features: " + str(X.columns[X.isna().any()].tolist()))
+    return X, y, ids
+
+
 def _iqr(s):
     return s.quantile(0.75) - s.quantile(0.25)
 
