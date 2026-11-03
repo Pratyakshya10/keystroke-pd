@@ -68,9 +68,11 @@ What the files contain, as loaded by `load_tappy()`:
   take levodopa), unlike a clinic study of early disease.
 - 227 users have a label file; 169 report PD and 58 do not. 49 users have data but
   no label file and are left out, and 10 labelled users have no data. That leaves
-  217 users (162 PD, 55 control) and 9,014,543 keystrokes.
-- 328 rows could not be parsed and were dropped. The same sanity rules as for
-  neuroQWERTY then remove another 2.07% of keystrokes (about 13,400 holds are zero
+  217 users (162 PD, 55 control) and 9,014,508 keystrokes.
+- 363 rows could not be parsed and were dropped; in some lines the fields run
+  together (a user ID or timestamp ends up in the direction column). The same
+  sanity rules as for neuroQWERTY then remove another 2.07% of keystrokes
+  (about 13,400 holds are zero
   or negative, down to roughly minus 24 hours, which looks like a midnight
   rollover in the recorder; 642 are over 5 s).
 - Data per user varies enormously: median 4,611 keystrokes, but 47 users have
